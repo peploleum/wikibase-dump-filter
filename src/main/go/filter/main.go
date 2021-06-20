@@ -44,15 +44,18 @@ func main() {
 		log.Println("reading from stdin:")
 	}
 	scanner := bufio.NewScanner(os.Stdin)
+	buf := make([]byte, 0, 64*1024)
+	scanner.Buffer(buf, 1024*1024*1024)
 	for scanner.Scan() {
 		text := scanner.Text()
 		if "]" == text || "[" == text {
 			continue
 		}
-		data := parseText(clean(text))
+		trimmed := clean(text)
+		data := parseText(trimmed)
 		isValidClaim := filterClaims(data, claimFilter)
 		if isValidClaim {
-			fmt.Println(text)
+			fmt.Println(trimmed)
 		}
 	}
 
