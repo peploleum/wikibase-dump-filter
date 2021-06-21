@@ -55,7 +55,7 @@ func main() {
 		data := parseText(trimmed)
 		isValidClaim := filterClaims(data, claimFilter)
 		if isValidClaim {
-			fmt.Println(trimmed)
+			fmt.Printf("%s\n", trimmed)
 		}
 	}
 
@@ -82,8 +82,15 @@ type ClaimFilter struct {
 }
 
 func parseClaimFilter() (claimFilter *ClaimFilter) {
+	// allow unspecified claim value
+	if !strings.Contains(claim, ":") && validClaim.MatchString(claim) {
+		return &ClaimFilter{
+			P: claim,
+			Q: "",
+		}
+	}
 	split := strings.Split(claim, ":")
-	if len(split) != 2 {
+	if len(split) < 2 {
 		return nil
 	}
 	var p = split[0]
@@ -108,11 +115,14 @@ func filterClaims(dat map[string]interface{}, claimFilter *ClaimFilter) bool {
 		if p == nil {
 			return false
 		} else {
+			if "" == claimFilter.Q {
+				return true
+			}
 			for _, v := range p.([]interface{}) {
 				props := v.(map[string]interface{})
 				if props["id"] != nil {
 					var id = strings.ToUpper(props["id"].(string))
-					if strings.Split(id, "$")[0] == claimFilter.Q {
+					if strings.EqualFold(strings.Split(id, "$")[0], claimFilter.Q) {
 						return true
 					}
 				}
