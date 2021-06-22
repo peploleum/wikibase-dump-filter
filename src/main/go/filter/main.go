@@ -44,7 +44,7 @@ func main() {
 		log.Println("reading from stdin:")
 	}
 	scanner := bufio.NewScanner(os.Stdin)
-	buf := make([]byte, 0, 64*1024)
+	buf := make([]byte, 0, 1024*1024*1024)
 	scanner.Buffer(buf, 1024*1024*1024)
 	for scanner.Scan() {
 		text := scanner.Text()
@@ -120,9 +120,12 @@ func filterClaims(dat map[string]interface{}, claimFilter *ClaimFilter) bool {
 			}
 			for _, v := range p.([]interface{}) {
 				props := v.(map[string]interface{})
-				if props["id"] != nil {
-					var id = strings.ToUpper(props["id"].(string))
-					if strings.EqualFold(strings.Split(id, "$")[0], claimFilter.Q) {
+				mainsnak := props["mainsnak"]
+				if mainsnak != nil {
+					mainsnak := mainsnak.(map[string]interface{})
+					value := mainsnak["datavalue"].(map[string]interface{})["value"].(map[string]interface{})
+					id := value["id"].(string)
+					if strings.EqualFold(id, claimFilter.Q) {
 						return true
 					}
 				}
