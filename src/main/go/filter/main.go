@@ -123,10 +123,13 @@ func filterClaims(dat map[string]interface{}, claimFilter *ClaimFilter) bool {
 				mainsnak := props["mainsnak"]
 				if mainsnak != nil {
 					mainsnak := mainsnak.(map[string]interface{})
-					value := mainsnak["datavalue"].(map[string]interface{})["value"].(map[string]interface{})
-					id := value["id"].(string)
-					if strings.EqualFold(id, claimFilter.Q) {
-						return true
+					datavalue := mainsnak["datavalue"]
+					if datavalue != nil {
+						value := datavalue.(map[string]interface{})["value"].(map[string]interface{})
+						id := value["id"].(string)
+						if strings.EqualFold(id, claimFilter.Q) {
+							return true
+						}
 					}
 				}
 			}
